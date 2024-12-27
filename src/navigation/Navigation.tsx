@@ -6,16 +6,40 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {isReadyRef, navigationRef} from '../services/Navigation';
 import DetailScreenViewModel from '../viewModel/DetailScreenViewModel';
 import CartScreenViewModel from '../viewModel/CartScreenViewModel';
-import { useSelector } from 'react-redux';
-import { RootState } from '../redux/store';
+import {useSelector} from 'react-redux';
+import {RootState} from '../redux/store';
 import FavouriteViewModel from '../viewModel/FavouriteViewmodel';
+import {StyleSheet, Text, View} from 'react-native';
+import React from 'react';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
+const CustomTabBadge = ({
+  count,
+  focused,
+}: {
+  count: number;
+  focused: boolean;
+}) => {
+  if (count === 0) return null;
+
+  return (
+    <View
+      style={[
+        styles.badge,
+        {backgroundColor: focused ? '#E96E6E' : '#91A1B0'},
+      ]}>
+      <Text style={styles.badgeText}>{count}</Text>
+    </View>
+  );
+};
+
 const TabNavigator = () => {
-  const CartData = useSelector((state:RootState) => state?.cart?.items);
-  const FavouriteData = useSelector((state:RootState) => state?.Favourite?.items);
+  const CartData = useSelector((state: RootState) => state?.cart?.items);
+  const FavouriteData = useSelector(
+    (state: RootState) => state?.Favourite?.items,
+  );
   return (
     <Tab.Navigator
       screenOptions={{
@@ -24,8 +48,8 @@ const TabNavigator = () => {
         tabBarActiveTintColor: '#E96E6E',
         tabBarStyle: {
           height: 80,
-          paddingTop: 10
-        }
+          paddingTop: 10,
+        },
       }}>
       <Tab.Screen
         name="HOME"
@@ -39,44 +63,26 @@ const TabNavigator = () => {
       <Tab.Screen
         name="REORDER"
         component={FavouriteViewModel}
-        options={{
-          tabBarIcon: ({size, color}) => (
-            <MaterialIcons name={'reorder'} size={size} color={color} />
+        options={({route}) => ({
+          tabBarIcon: ({ size, color, focused }: { size: number; color: string; focused: boolean }) => (
+            <>
+              <MaterialIcons name="reorder" size={size} color={color} />
+              <CustomTabBadge count={FavouriteData.length} focused={focused} />
+            </>
           ),
-          tabBarBadge: FavouriteData.length > 0 ? FavouriteData.length : undefined,
-          tabBarBadgeStyle: {
-            backgroundColor: '#91A1B0',  
-            color: '#000', 
-            fontSize: 10, 
-            width: 20,    
-            height: 20,   
-            borderRadius: 10,
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            top: -15
-          },
-        }}
+        })}
       />
       <Tab.Screen
         name="CART"
         component={CartScreenViewModel}
-        options={{
-          tabBarIcon: ({size, color}) => (
-            <MaterialIcons name={'shopping-cart'} size={size} color={color} />
+        options={({route}) => ({
+          tabBarIcon: ({ size, color, focused }: { size: number; color: string; focused: boolean }) => (
+            <>
+              <MaterialIcons name="shopping-cart" size={size} color={color} />
+              <CustomTabBadge count={CartData.length} focused={focused} />
+            </>
           ),
-          tabBarBadge: CartData.length > 0 ? CartData.length : undefined,
-          tabBarBadgeStyle: {
-            backgroundColor: '#91A1B0',  
-            color: '#000', 
-            fontSize: 10, 
-            width: 20,    
-            height: 20,   
-            borderRadius: 10,
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            top: -15
-          },
-        }}
+        })}
       />
       <Tab.Screen
         name="PROFILE"
@@ -107,5 +113,22 @@ const Navigation = () => {
     </NavigationContainer>
   );
 };
+
+const styles = StyleSheet.create({
+  badge: {
+    position: 'absolute',
+    top: -10,
+    right: -15,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badgeText: {
+    color: '#000',
+    fontSize: 10,
+  },
+});
 
 export default Navigation;
